@@ -51,7 +51,7 @@ class DomainConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_MQTT_NODE, default="V04P28"): cv.string,
                 vol.Required(CONF_LANGUAGE, default="en"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=["en", "de"],
+                        options=["de", "en", "fr", "it", "nl"],
                         mode=selector.SelectSelectorMode.DROPDOWN,
                     ),
                 ),
@@ -73,7 +73,7 @@ class DomainConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_LANGUAGE, default=user_input[CONF_LANGUAGE]
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
-                            options=["en", "de"],
+                            options=["de", "en", "fr", "it", "nl"],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
@@ -176,7 +176,7 @@ class OptionsFlow(config_entries.OptionsFlow):
                     default=self.config_entry.data.get(CONF_LANGUAGE),
                 ): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=["en", "de"],
+                        options=["de", "en", "fr", "it", "nl"],
                         mode=selector.SelectSelectorMode.DROPDOWN,
                     ),
                 ),
@@ -201,7 +201,7 @@ class OptionsFlow(config_entries.OptionsFlow):
                         CONF_LANGUAGE, default=user_input[CONF_LANGUAGE]
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
-                            options=["en", "de"],
+                            options=["de", "en", "fr", "it", "nl"],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
