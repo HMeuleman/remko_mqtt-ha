@@ -50,6 +50,7 @@ from .remko_regs import (
     id_names,
     reg_id,
     query_list,
+    client_id,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -67,54 +68,59 @@ class HeatPump:
         """Handle new MQTT messages."""
         _LOGGER.debug("%s: message.payload:[%s]", self._id, message.payload)
         try:
-            if self._mqtt_counter == self._freq:
-                json_dict = json.loads(message.payload)
-                json_dict = json_dict.get("values")
-                if message.topic == self._data_topic:
-                    for k in json_dict:
-                        # Map incomming registers to named settings based on id_reg (Remko_regs)
-                        if k in self._id_reg:
-                            _LOGGER.debug("[%s] [%s] [%s]", self._id, k, json_dict[k])
+            json_dict = json.loads(message.payload)
+            json_dict = json_dict.get("values")
+            if message.topic == self._data_topic:
+                for k in json_dict:
+                    # Map incomming registers to named settings based on id_reg (Remko_regs)
+                    if k in self._id_reg:
+                        _LOGGER.debug("[%s] [%s] [%s]", self._id, k, json_dict[k])
 
-                            # Internal mapping of Remko_MQTT regs, used to create update events
-                            self._hpstate[k] = json_dict[k]
-                            if reg_id[self._id_reg[k]][1] == "switch":
-                                self._hpstate[k] = int(self._hpstate[k], 16) > 0
-                            if reg_id[self._id_reg[k]][1] == "sensor_el":
-                                self._hpstate[k] = int(self._hpstate[k], 16) * 100
-                            if reg_id[self._id_reg[k]][1] in [
-                                "temperature",
-                                "temperature_input",
-                            ]:
-                                self._hpstate[k] = int(self._hpstate[k], 16) / 10
-                            if reg_id[self._id_reg[k]][1] == "sensor_mode":
-                                mode = f"opmode{int(json_dict[k], 16)}"
-                                self._hpstate[k] = id_names[mode][self._langid]
-                            if reg_id[self._id_reg[k]][1] == "select_input":
-                                if self._id_reg[k] == "main_mode":
-                                    mode = f"mode{int(json_dict[k], 16)}"
-                                elif self._id_reg[k] == "dhw_opmode":
-                                    mode = f"dhwopmode{int(json_dict[k], 16)}"
-                                self._hpstate[k] = id_names[mode][self._langid]
+                        # Internal mapping of Remko_MQTT regs, used to create update events
+                        self._hpstate[k] = json_dict[k]
+                        if reg_id[self._id_reg[k]][1] == "switch":
+                            self._hpstate[k] = int(self._hpstate[k], 16) > 0
+                        if reg_id[self._id_reg[k]][1] == "sensor_el":
+                            self._hpstate[k] = int(self._hpstate[k], 16) * 100
+                        if reg_id[self._id_reg[k]][1] == "number":
+                            self._hpstate[k] = int(self._hpstate[k], 16)
+                        if reg_id[self._id_reg[k]][1] in [
+                            "temperature",
+                            "temperature_input",
+                        ]:
+                            self._hpstate[k] = int(self._hpstate[k], 16) / 10
+                        if reg_id[self._id_reg[k]][1] == "sensor_mode":
+                            mode = f"opmode{int(json_dict[k], 16)}"
+                            self._hpstate[k] = id_names[mode][self._langid]
+                        if reg_id[self._id_reg[k]][1] == "select_input":
+                            if self._id_reg[k] == "main_mode":
+                                mode = f"mode{int(json_dict[k], 16)}"
+                            elif self._id_reg[k] == "dhw_opmode":
+                                mode = f"dhwopmode{int(json_dict[k], 16)}"
+                            self._hpstate[k] = id_names[mode][self._langid]
+                    else:
+                        _LOGGER.debug("IGNORE [%s] [%s] [%s]", self._id, k, json_dict[k])
 
-                    self._hpstate["communication_status"] = json_dict.get(
-                        "vp_read", "Ok"
-                    )
+                self._hpstate["communication_status"] = json_dict.get(
+                    "vp_read", "Ok"
+                )
 
-                    self._hass.bus.fire(
-                        self._domain + "_" + self._id + "_msg_rec_event", {}
-                    )
+                self._hass.bus.fire(
+                    self._domain + "_" + self._id + "_msg_rec_event", {}
+                )
 
-                    await self.mqtt_keep_alive()
-                    self._mqtt_counter = 0
+                #await asyncio.sleep(self._freq)
+                #await asyncio.sleep(5)
 
-                else:
-                    _LOGGER.error("JSON result was not from Remko-mqtt")
             else:
-                self._mqtt_counter += 1
+                _LOGGER.error("JSON result was not from Remko-mqtt")
         except ValueError:
             _LOGGER.error("MQTT payload could not be parsed as JSON")
             _LOGGER.debug("Erroneous JSON: %s", message.payload)
+
+        if self._mqtt_counter == 1:
+            self._mqtt_counter = 0
+            await self.mqtt_keep_alive()
 
     def __init__(self, hass, entry: ConfigEntry):
         self._hass = hass
@@ -125,7 +131,7 @@ class HeatPump:
         self._id_reg = {}
         self.unsubscribe_callback = None
         self._freq = entry.data[CONF_FREQ]
-        self._mqtt_counter = entry.data[CONF_FREQ]
+        #self._mqtt_counter = entry.data[CONF_FREQ]
 
         # Create reverse lookup dictionary (id_reg->reg_number)
 
@@ -141,7 +147,9 @@ class HeatPump:
         )
         # """ Wait before getting new values """
         await asyncio.sleep(5)
-        self._mqtt_counter = self._freq
+        #self._mqtt_counter = self._freq
+        self._mqtt_counter = 1
+        await self.mqtt_keep_alive()
         self._hass.bus.fire(self._domain + "_" + self._id + "_msg_rec_event", {})
 
     async def remove_mqtt(self):
@@ -212,7 +220,7 @@ class HeatPump:
             _LOGGER.error("No MQTT message sent due to unknown register:[%s]", register)
             return
 
-        if register_id == "water_temp_req":
+        if register_id == "temp_req":
             topic = self._cmd_topic
             hex_str = hex(int(value * 10)).upper()
             hex_str = hex_str[2:].zfill(4)
@@ -242,21 +250,40 @@ class HeatPump:
         )
         """ Wait before getting new values """
         await asyncio.sleep(5)
-        self._mqtt_counter = self._freq
+        #self._mqtt_counter = self._freq
         self._hass.bus.fire(self._domain + "_" + self._id + "_msg_rec_event", {})
 
     async def mqtt_keep_alive(self) -> None:
         """Heatpump sends MQTT messages only when triggered."""
 
         topic = self._cmd_topic
-        value = "true"
-        if query_list:
-            payload = json.dumps({"FORCE_RESPONSE": value, "query_list": query_list})
+        value_5074 = "5074"
+        value_0255 = "0255"
+        value_5106 = "5106"
+        value_0000 = "0000"
+        value_5109 = "5109"
+        #payload = json.dumps({"FORCE_RESPONSE": value, "query_lists": query_list})
+        if client_id:
+            payload = json.dumps({"FORCE_RESPONSE": True, "query_list": query_list})
+            #payload = json.dumps({"FORCE_RESPONSE": True, "values": {value_5074:value_0255, value_5106:value_0000, value_5109:value_0000}, "query_list": query_list})
+            #payload = json.dumps({"FORCE_RESPONSE": True, "query_list": query_list, "ClIENT_ID":client_id})
+        #else if query_list:
+        #if client_id:
+            #payload = json.dumps({"FORCE_RESPONSE":'true',"query_list":query_list})
+        #elif query_list:
+            #payload = json.dumps({"FORCE_RESPONSE": value, "query_list": query_list})
+            #payload = json.dumps({"FORCE_RESPONSE":'true',"query_list":query_list})
         else:
-            payload = json.dumps({"FORCE_RESPONSE": value})
+            payload = json.dumps({"FORCE_RESPONSE": True})
 
+        #await asyncio.sleep(self._freq)
+        self._mqtt_counter = 0
+        await asyncio.sleep(30)
+        self._mqtt_counter = 1
+        
         _LOGGER.debug("topic:[%s]", topic)
         _LOGGER.debug("payload:[%s]", payload)
+
         self._hass.async_create_task(
             mqtt.async_publish(self._hass, topic, payload, qos=2, retain=False)
         )
