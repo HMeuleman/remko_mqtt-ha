@@ -57,6 +57,7 @@ async def async_setup_entry(
             "sensor_el",
             "sensor_input",
             "sensor_mode",
+            "number",
         ]:
             device_id = key
             if key in id_names:
