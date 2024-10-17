@@ -32,10 +32,11 @@ from .remko_regs import (
     reg_id,
 )
 
-if TYPE_CHECKING:
-    from functools import cached_property
-else:
-    from homeassistant.backports.functools import cached_property
+#if TYPE_CHECKING:
+#    from functools import cached_property
+#else:
+#    from homeassistant.backports.functools import cached_property
+from functools import cached_property
 
 _LOGGER = logging.getLogger(__name__)
 
