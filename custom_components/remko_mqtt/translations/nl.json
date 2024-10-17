@@ -1,0 +1,47 @@
+{
+  "title": "Remko MQTT",
+  "config": {
+    "flow_title":"Flow title",
+    "abort": {
+      "already_configured": "Het gebruikte id naam is reeds in gebruik."
+    },
+    "error": {
+      "invalid_nodename": "De ingevoerde MQTT Nodename is niet geldig",
+      "creation_id": "Het Unique ID is niet uniek of niet geldig",
+      "creation_error": "Een fout is opgetreden tijdens het updaten van de configuratie",
+      "invalid_language": "Een fout is opgetreden tijdens het aanmaken van het configuratie object"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "id_name": "Unique ID",
+          "mqtt_node": "MQTT Nodename",
+          "language": "Taal",
+          "freq": "Frequentie",
+          "remko_dbg": "Enable debug"
+        },
+        "title": "Heatpump configuratie",
+        "description": "Set up een nieuwe Remko_MQTT Instance"
+       }
+    },
+    "progress": {
+      "slow_task": "Deze boodschap wordt getoonds als `slow_task` wordt geretourneerd als `progress_action` voor `async_show_progress`."
+    }
+  },
+  "options": {
+    "abort": {
+      "already_configured": "Het gbruikte id name is reeds in gebruik."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "mqtt_node": "MQTT Nodename",
+          "language": "Taal",
+          "freq": "Frequentie",
+          "remko_dbg": "Enable debug"
+        },
+        "title": "Opties"
+      }
+    }
+  }
+}
