@@ -6,14 +6,14 @@ DOMAIN = "remko_mqtt"
 # == Remko Const
 CONF_ID = "id_name"
 CONF_NAME = "Remko MQTT"
-CONF_VER = "v0.4.0"
+CONF_VER = "v0.6.0"
 CONF_MQTT_NODE = "V04P28"
 CONF_MQTT_DBG = "remko_dbg"
 CONF_LANGUAGE = "language"
 CONF_DATA = "data_msg"
 CONF_FREQ = "freq"
 DEFAULT_DBG = False
-AVAILABLE_LANGUAGES = ["en", "de"]
+AVAILABLE_LANGUAGES = ["de", "en", "fr", "it", "nl"]
 
 
 PLATFORM_AUTOMATION = "automation"
