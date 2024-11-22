@@ -214,11 +214,11 @@ class HeatPumpNumber(NumberEntity):
         if value != self._heatpump._hpstate[self._vp_reg]:
             self._heatpump._hpstate[self._vp_reg] = value
             await self._heatpump.send_mqtt_reg(self._idx, value)
-            await self._heatpump._hass.bus.fire(
-                # This will reload all sensor entities in this heatpump
-                f"{self._heatpump._domain}__msg_rec_event",
-                {},
-            )
+            #await self._heatpump._hass.bus.fire(
+            #    # This will reload all sensor entities in this heatpump
+            #    f"{self._heatpump._domain}__msg_rec_event",
+            #    {},
+            #)
 
     async def async_update(self):
         """Update the value of the entity."""
