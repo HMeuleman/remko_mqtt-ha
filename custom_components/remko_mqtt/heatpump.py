@@ -88,7 +88,10 @@ class HeatPump:
                             "temperature",
                             "temperature_input",
                         ]:
-                            self._hpstate[k] = int(self._hpstate[k], 16) / 10
+                            if (int(self._hpstate[k], 16)) > 32768:
+                                self._hpstate[k] = (int(self._hpstate[k], 16) - 65536) / 10
+                            else:
+                                self._hpstate[k] = int(self._hpstate[k], 16) / 10
                         if reg_id[self._id_reg[k]][1] == "sensor_mode":
                             mode = f"opmode{int(json_dict[k], 16)}"
                             self._hpstate[k] = id_names[mode][self._langid]
@@ -220,9 +223,18 @@ class HeatPump:
             _LOGGER.error("No MQTT message sent due to unknown register:[%s]", register)
             return
 
-        if register_id == "temp_req":
+        #if register_id == "temp_req":
+        if register_id in [
+            "temp_req",
+            "out_temp_corr",
+            "min_work_temp",
+        ]:
             topic = self._cmd_topic
-            hex_str = hex(int(value * 10)).upper()
+            #hex_str = hex(int(value * 10)).upper()
+            if (value < 0):
+                hex_str = hex(int((value * 10) + 65536)).upper()
+            else:
+                hex_str = hex(int(value * 10)).upper()
             hex_str = hex_str[2:].zfill(4)
             payload = json.dumps({"values": {register: hex_str}})
         elif register_id in [
@@ -249,9 +261,9 @@ class HeatPump:
             mqtt.async_publish(self._hass, topic, payload, qos=2, retain=False)
         )
         """ Wait before getting new values """
-        await asyncio.sleep(5)
+        #await asyncio.sleep(5)
         #self._mqtt_counter = self._freq
-        self._hass.bus.fire(self._domain + "_" + self._id + "_msg_rec_event", {})
+        #self._hass.bus.fire(self._domain + "_" + self._id + "_msg_rec_event", {})
 
     async def mqtt_keep_alive(self) -> None:
         """Heatpump sends MQTT messages only when triggered."""
