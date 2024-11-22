@@ -1,3 +1,11 @@
+
+function id2translation(a, c) {
+    var b = isNaN(shmReadLocal(1014)[0]) ? 0 : value2language(shmReadLocal(1014)[0]);
+    b = "undefined" != typeof global.smt.text[a] 
+
+put breakpoint in id2tralation and check global.smt.txt
+
+
 Object
 0
 : 
