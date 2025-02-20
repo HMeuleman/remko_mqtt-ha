@@ -77,6 +77,7 @@ class HeatPump:
                         _LOGGER.debug("[%s] [%s] [%s]", self._id, k, json_dict[k])
 
                         # Internal mapping of Remko_MQTT regs, used to create update events
+                        temp = self._hpstate[k]
                         self._hpstate[k] = json_dict[k]
                         if reg_id[self._id_reg[k]][1] == "switch":
                             self._hpstate[k] = int(self._hpstate[k], 16) > 0
@@ -88,10 +89,22 @@ class HeatPump:
                             "temperature",
                             "temperature_input",
                         ]:
-                            if (int(self._hpstate[k], 16)) > 32768:
-                                self._hpstate[k] = (int(self._hpstate[k], 16) - 65536) / 10
-                            else:
-                                self._hpstate[k] = int(self._hpstate[k], 16) / 10
+                            # deal with negative numbers
+                            new = int(self._hpstate[k], 16)
+                            if new > 32768:
+                                new = new - 65536
+                            # smooth temperature to avoid too many database updates 
+                            # temperature will always be 0.2 "behind"
+                            if reg_id[self._id_reg[k]][1] is "temperature":
+                                old = int(temp * 10)
+                                if new - old > 2:
+                                    new = new - 2
+                                elif new - old < -2:
+                                    new = new + 2
+                                else: 
+                                    new = old
+                            # store new (or old value) in float     
+                            self._hpstate[k] = new / 10
                         if reg_id[self._id_reg[k]][1] == "sensor_mode":
                             mode = f"opmode{int(json_dict[k], 16)}"
                             self._hpstate[k] = id_names[mode][self._langid]
