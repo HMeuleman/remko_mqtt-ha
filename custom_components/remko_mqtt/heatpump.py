@@ -73,9 +73,8 @@ class HeatPump:
             if message.topic == self._data_topic:
                 for k in json_dict:
                     # Map incomming registers to named settings based on id_reg (Remko_regs)
-                    if k in self._id_reg:
-                        _LOGGER.debug("[%s] [%s] [%s]", self._id, k, json_dict[k])
-
+                    if k in self._id_reg and json_dict[k] != "":
+                        _LOGGER.debug("id [%s] value [%s] => [%s]", k, self._hpstate[k], json_dict[k])
                         # Internal mapping of Remko_MQTT regs, used to create update events
                         temp = self._hpstate[k]
                         self._hpstate[k] = json_dict[k]
@@ -83,28 +82,44 @@ class HeatPump:
                             self._hpstate[k] = int(self._hpstate[k], 16) > 0
                         if reg_id[self._id_reg[k]][1] == "sensor_el":
                             self._hpstate[k] = int(self._hpstate[k], 16) * 100
+                        if reg_id[self._id_reg[k]][1] == "sensor_en":
+                            # dont know how to translate, but it is definately not plain kWh
+                            self._hpstate[k] = int(self._hpstate[k], 16)
                         if reg_id[self._id_reg[k]][1] == "number":
                             self._hpstate[k] = int(self._hpstate[k], 16)
                         if reg_id[self._id_reg[k]][1] in [
                             "temperature",
                             "temperature_input",
                         ]:
-                            # deal with negative numbers
-                            new = int(self._hpstate[k], 16)
-                            if new > 32768:
-                                new = new - 65536
-                            # smooth temperature to avoid too many database updates 
-                            # temperature will always be 0.2 "behind"
-                            if reg_id[self._id_reg[k]][1] is "temperature":
-                                old = int(temp * 10)
-                                if new - old > 2:
-                                    new = new - 2
-                                elif new - old < -2:
-                                    new = new + 2
-                                else: 
-                                    new = old
-                            # store new (or old value) in float     
-                            self._hpstate[k] = new / 10
+                            try:
+                                # deal with negative numbers
+                                new = int(self._hpstate[k], 16)
+                                if new > 32768:
+                                    new = new - 65536
+                                # smooth temperature to avoid too many database updates 
+                                # temperature will always be 0.2 "behind"
+                                if reg_id[self._id_reg[k]][1] == "temperature":
+                                    old = int(temp * 10)
+                                    if new - old > 2:
+                                        new = new - 2
+                                    elif new - old < -2:
+                                        new = new + 2
+                                    else: 
+                                        new = old
+                                # store new (or old value) in float     
+                                self._hpstate[k] = new / 10
+                            except:
+                                _LOGGER.error("FAIL id [%s] value [%s] => [%s]", k, temp, json_dict[k])
+                                try:
+                                    new = int(self._hpstate[k], 16)
+                                    if new > 32768:
+                                        new = new - 65536
+                                    self._hpstate[k] = new / 10
+                                except:
+                                    # sometimes an empty result is received: "1946": ""
+                                    # should be catched in top, will add code, but also except handling
+                                    # here. Restore old value
+                                    self._hpstate[k] = temp
                         if reg_id[self._id_reg[k]][1] == "sensor_mode":
                             mode = f"opmode{int(json_dict[k], 16)}"
                             self._hpstate[k] = id_names[mode][self._langid]
@@ -115,8 +130,7 @@ class HeatPump:
                                 mode = f"dhwopmode{int(json_dict[k], 16)}"
                             self._hpstate[k] = id_names[mode][self._langid]
                     else:
-                        _LOGGER.debug("IGNORE [%s] [%s] [%s]", self._id, k, json_dict[k])
-
+                        _LOGGER.debug("IGNORE [%s] [%s]", k, json_dict[k])
                 self._hpstate["communication_status"] = json_dict.get(
                     "vp_read", "Ok"
                 )
@@ -124,15 +138,11 @@ class HeatPump:
                 self._hass.bus.fire(
                     self._domain + "_" + self._id + "_msg_rec_event", {}
                 )
-
-                #await asyncio.sleep(self._freq)
-                #await asyncio.sleep(5)
-
             else:
                 _LOGGER.error("JSON result was not from Remko-mqtt")
         except ValueError:
-            _LOGGER.error("MQTT payload could not be parsed as JSON")
-            _LOGGER.debug("Erroneous JSON: %s", message.payload)
+            _LOGGER.debug("MQTT payload could not be parsed as JSON")
+            _LOGGER.error("Erroneous JSON: %s", message.payload)
 
         if self._mqtt_counter == 1:
             self._mqtt_counter = 0
@@ -162,7 +172,7 @@ class HeatPump:
             self.message_received,
         )
         # """ Wait before getting new values """
-        await asyncio.sleep(5)
+        #await asyncio.sleep(5)
         #self._mqtt_counter = self._freq
         self._mqtt_counter = 1
         await self.mqtt_keep_alive()
