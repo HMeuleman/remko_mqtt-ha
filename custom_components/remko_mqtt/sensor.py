@@ -2,7 +2,12 @@ import logging
 from homeassistant.core import callback
 
 
-from homeassistant.components.sensor import SensorEntity, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorEntity, 
+    SensorStateClass,
+    SensorDeviceClass
+)
+
 from homeassistant.const import (
     ATTR_IDENTIFIERS,
     ATTR_MANUFACTURER,
@@ -11,7 +16,11 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.device_registry import DeviceEntryType
 
-from homeassistant.const import UnitOfTemperature
+from homeassistant.const import (
+    UnitOfTemperature,
+    UnitOfEnergy,
+    UnitOfPower
+)
 
 from .const import (
     DOMAIN,
@@ -55,6 +64,7 @@ async def async_setup_entry(
             "temperature",
             "sensor",
             "sensor_el",
+            "sensor_en",
             "sensor_input",
             "sensor_mode",
             "number",
@@ -96,9 +106,17 @@ class HeatPumpSensor(SensorEntity):
         # self._attr_native_unit_of_measurement = unit_of_measurement
         if vp_type not in [
             "sensor_mode",
+            "sensor_en",
             "generated_sensor",
         ]:
             self._attr_state_class = SensorStateClass.MEASUREMENT
+
+        if vp_type == "sensor_en":
+            self._attr_device_class = SensorDeviceClass.ENERGY
+            self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+
+        if vp_type == "sensor_el":
+            self._attr_device_class = SensorDeviceClass.ENERGY
 
         # set HA instance attributes directly (mostly don't use property)
         self._attr_unique_id = f"{heatpump._domain}_{device_id}"
@@ -123,6 +141,12 @@ class HeatPumpSensor(SensorEntity):
         ):
             self._icon = "mdi:temperature-celsius"
             self._unit = UnitOfTemperature.CELSIUS
+        elif vp_type == "sensor_en":
+            self._icon = "mdi:lightning-bolt"
+            self._unit = UnitOfEnergy.KILO_WATT_HOUR
+        elif vp_type == "sensor_el":
+            self._icon = "mdi:flash"
+            self._unit = UnitOfPower.WATT
         else:
             if vp_unit:
                 self._unit = vp_unit
@@ -200,8 +224,3 @@ class HeatPumpSensor(SensorEntity):
             self._state = state
             self.async_schedule_update_ha_state()
             _LOGGER.debug("async_update_ha: %s", str(state))
-
-    @property
-    def device_class(self):
-        """Return the class of this device."""
-        return f"{DOMAIN}_HeatPumpSensor"
