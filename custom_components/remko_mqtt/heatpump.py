@@ -50,7 +50,6 @@ from .remko_regs import (
     id_names,
     reg_id,
     query_list,
-    client_id,
 )
 
 _LOGGER = logging.getLogger(__name__)
