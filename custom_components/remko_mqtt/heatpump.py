@@ -82,6 +82,20 @@ class HeatPump:
                             self._hpstate[k] = int(self._hpstate[k], 16) > 0
                         if reg_id[self._id_reg[k]][1] == "sensor_el":
                             self._hpstate[k] = int(self._hpstate[k], 16) * 100
+                        if reg_id[self._id_reg[k]][1] == "sensor_elc":
+                            # this field type is 1/100th of Watt, ridiculous and gets lots
+                            # of updates, limit accepted changes, to avoid too many 
+                            # database updates.
+                            new = int(self._hpstate[k], 16)
+                            new = int(new / 100)
+                            old = int(temp)
+                            if new - old > 1:
+                                new = new - 1
+                            elif new - old < -1:
+                                new = new + 1
+                            else: 
+                                new = old
+                            self._hpstate[k] = new
                         if reg_id[self._id_reg[k]][1] == "sensor_en":
                             # dont know how to translate, but it is definately not plain kWh
                             self._hpstate[k] = int(self._hpstate[k], 16)
@@ -246,14 +260,9 @@ class HeatPump:
             _LOGGER.error("No MQTT message sent due to unknown register:[%s]", register)
             return
 
-        #if register_id == "temp_req":
-        if register_id in [
-            "temp_req",
-            "out_temp_corr",
-            "min_work_temp",
-        ]:
+        reg_type = reg_id[register_id][1]
+        if reg_type == "temperature_input":
             topic = self._cmd_topic
-            #hex_str = hex(int(value * 10)).upper()
             if (value < 0):
                 hex_str = hex(int((value * 10) + 65536)).upper()
             else:
@@ -292,26 +301,12 @@ class HeatPump:
         """Heatpump sends MQTT messages only when triggered."""
 
         topic = self._cmd_topic
-        value_5074 = "5074"
-        value_0255 = "0255"
-        value_5106 = "5106"
-        value_0000 = "0000"
-        value_5109 = "5109"
-        #payload = json.dumps({"FORCE_RESPONSE": value, "query_lists": query_list})
-        if client_id:
+        if query_list:
             payload = json.dumps({"FORCE_RESPONSE": True, "query_list": query_list})
-            #payload = json.dumps({"FORCE_RESPONSE": True, "values": {value_5074:value_0255, value_5106:value_0000, value_5109:value_0000}, "query_list": query_list})
-            #payload = json.dumps({"FORCE_RESPONSE": True, "query_list": query_list, "ClIENT_ID":client_id})
-        #else if query_list:
-        #if client_id:
-            #payload = json.dumps({"FORCE_RESPONSE":'true',"query_list":query_list})
-        #elif query_list:
-            #payload = json.dumps({"FORCE_RESPONSE": value, "query_list": query_list})
-            #payload = json.dumps({"FORCE_RESPONSE":'true',"query_list":query_list})
         else:
             payload = json.dumps({"FORCE_RESPONSE": True})
 
-        #await asyncio.sleep(self._freq)
+        #max. frequency in which a request is posted is 30 seconds. 
         self._mqtt_counter = 0
         await asyncio.sleep(30)
         self._mqtt_counter = 1
