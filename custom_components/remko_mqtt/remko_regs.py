@@ -8,8 +8,7 @@ FIELD_MAXVALUE = 4
 # Query list
 #query_list = []
 #query_list = [127, 132, 327, 1014, 1088, 1893, 1894, 1946, 1951, 2015, 5001, 5032, 5036, 5123, 5039, 5190, 5320, 5693, 5822, 5824]
-query_list = [1014, 1088, 1666, 1893, 1894, 1946, 2015, 5001, 5032, 5036, 5123, 5190, 5320, 5693, 5822, 5824]
-client_id = "xxx"
+query_list = [1014, 1088, 1666, 1893, 1894, 1946, 2015, 5001, 5032, 5036, 5123, 5190, 5320, 5579, 5693, 5822, 5824]
 
 #min_work_temp, WP will not work when 'outside temp' below this temp. Goes into frost protection state
 # Register as sensors
@@ -33,6 +32,7 @@ reg_id = {
     "verw_water_temp": ["5190", "temperature", "ºC", 0, 70],
     "el_consumption": ["5320", "sensor_el", "W", 0, 6000],
     "energy_heating": ["5374", "sensor_en", "kWh", "", ""],
+    "el_inside_unit": ["5579", "sensor_elc", "W", "", ""],
     "dhw_heating": ["5693", "action", "", "", ""],
     "comp_starts": ["5822", "number", "", "" , "" ],
     "comp_hours": ["5824", "number", "", "" , "" ],
@@ -55,6 +55,7 @@ id_names = {
     "verw_water_temp": ["Heizwasser Ist-Temp.", "Heating water temp. (actual)", "Temp. eau chaude (Val.r réelle)", "Temp. Produzione", "Verw. watertemp (act. waarde)"],
     "el_consumption": ["Leistung elektrisch", "electr. power heatpump", "Puissance électr. thermopompe", "Ass. elettrico PDC", "Elektr. Vermogen warmtepomp"],
     "energy_heating": ["Energie Heizen", "Energy heating", "Énergie Chauffer", "Energia riscaldamento", "Energie verwarmen"],
+    "el_inside_unit": ["Leistungsaufnahme", "Power input", "Puissance absorbée", "Potenza assorbita", "Opgenomen vermogen"],
     "main_mode": ["Raumklima Modus", "Room climate mode", "Mode de climat ambiant", "Modalità Clima ambiente", "Ruimteklimaat-Modus"],
     "opmode": ["Aktuelle Betriebsart", "Current operating mode", "Mode de fonctionnement actuel", "Modo operativo attuale", "Actuele bedrijfstoestand"],
     #"dhw_opmode": ["Modus", "Mode", "Mode", "Modo funzionamento", "Modus"],
