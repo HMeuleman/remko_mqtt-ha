@@ -209,16 +209,10 @@ class HeatPumpNumber(NumberEntity):
         """Return the class of this device."""
         return f"{DOMAIN}_HeatPumpNumber"
 
-#    async def async_set_value(self, value: float) -> None:
     async def async_set_native_value(self, value: float) -> None:
         if value != self._heatpump._hpstate[self._vp_reg]:
             self._heatpump._hpstate[self._vp_reg] = value
             await self._heatpump.send_mqtt_reg(self._idx, value)
-            #await self._heatpump._hass.bus.fire(
-            #    # This will reload all sensor entities in this heatpump
-            #    f"{self._heatpump._domain}__msg_rec_event",
-            #    {},
-            #)
 
     async def async_update(self):
         """Update the value of the entity."""
