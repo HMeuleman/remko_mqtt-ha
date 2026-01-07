@@ -69,6 +69,13 @@ class HeatPump:
         try:
             json_dict = json.loads(message.payload)
             json_dict = json_dict.get("values")
+            # If a non-data message (like: 
+            # '{"CLIENT_ID": "...", "SMT_DEV": 236}') arrives, 
+            # the code will now skip processing instead of trying to iterate None.
+            # and resulting in exception
+            if not isinstance(json_dict, dict):
+                _LOGGER.warning("MQTT payload missing or invalid 'values': %s (topic=%s)", message.payload, message.topic)
+                return
             if message.topic == self._data_topic:
                 for k in json_dict:
                     # Map incomming registers to named settings based on id_reg (Remko_regs)
