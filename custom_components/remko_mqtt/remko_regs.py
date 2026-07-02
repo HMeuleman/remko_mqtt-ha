@@ -8,7 +8,7 @@ FIELD_MAXVALUE = 4
 # Query list
 #query_list = []
 #query_list = [127, 132, 327, 1014, 1088, 1893, 1894, 1946, 1951, 2015, 5001, 5032, 5036, 5123, 5039, 5190, 5320, 5693, 5822, 5824]
-query_list = [1014, 1088, 1666, 1893, 1894, 1946, 2015, 5001, 5032, 5036, 5123, 5124, 5132, 5157, 5190, 5320, 5579, 5581, 5693, 5822, 5824]
+query_list = [1014, 1088, 1666, 1893, 1894, 1946, 2015, 5001, 5032, 5036, 5123, 5124, 5131, 5132, 5157, 5190, 5320, 5579, 5581, 5693, 5822, 5824]
 
 #min_work_temp, WP will not work when 'outside temp' below this temp. Goes into frost protection state
 # Register as sensors
@@ -30,6 +30,7 @@ reg_id = {
     "floor_temp": ["5036", "temperature", "ºC", 0, 70],
     "in_floor_temp": ["5124", "temperature", "ºC", 0, 70],
     "return_floor_temp": ["5123", "temperature", "ºC", 0, 70],
+    "buffer_mid_temp": ["5131", "temperature", "ºC", 0, 70],
     "mixer_pos": ["5157", "number", "%", 0 , 100 ],
     "return_wp_temp": ["5132", "temperature", "ºC", 0, 70],
     "in_wp_temp": ["5581", "temperature", "ºC", 0, 70],
@@ -57,6 +58,7 @@ id_names = {
     "floor_temp": ["Ist-Temperatur", "Actual temperature", "Température réelle", "Temp. Circ.", "Vloerverwarming temp."],
     "in_floor_temp": ["HK Vorlauftemp. (S12)", "HC Flow temp. (S12)", "Temp. aller CC (S12)", "Temp. mandata (S12)", "Vloerverwarming aanvoer temp. (S12)"],
     "return_floor_temp": ["HK Rücklauftemp (S11)", "HC Return temp. (S11)", "Temp. retour CC (S11)", "Temp. ritorno (S11)", "Vloerverwarming retour temp. (S11)"],
+    "buffer_mid_temp": ["Temp. Pufferspeicher (S09)", "Buffer tank temp. (S09)", "Temp. ballon tampon (S09)", "Temp. Puffer (S09)", "Buffer temp. Midden (S09)"],
     "mixer_pos": ["HK-Mischer Position", "HC mixer position", "Position mélangeur CC", "Posizione Valvola MIX", "Vloerverwarming mengventiel positie"],
     "return_wp_temp": ["Rücklauftemp (S13)", "Return temp. (S13)", "Temp. retour (S13)", "Temp. ritorno (S13)", "WP retour temp. (S13)"],
     "in_wp_temp": ["Vorlauftemp. (S15)", "Flow temp. (S15)", "Temp. aller (S15)", "Temp. mandata (S15)", "WP aanvoer temp. (S15)"],
