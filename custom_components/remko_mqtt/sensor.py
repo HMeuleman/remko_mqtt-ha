@@ -64,6 +64,7 @@ async def async_setup_entry(
             "temperature",
             "sensor",
             "sensor_el",
+            "sensor_elc",
             "sensor_en",
             "sensor_input",
             "sensor_mode",
@@ -115,7 +116,7 @@ class HeatPumpSensor(SensorEntity):
             self._attr_device_class = SensorDeviceClass.ENERGY
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
 
-        if vp_type == "sensor_el":
+        if vp_type in ["sensor_el", "sensor_elc"]:
             self._attr_device_class = SensorDeviceClass.ENERGY
 
         # set HA instance attributes directly (mostly don't use property)
@@ -144,7 +145,7 @@ class HeatPumpSensor(SensorEntity):
         elif vp_type == "sensor_en":
             self._icon = "mdi:lightning-bolt"
             self._unit = UnitOfEnergy.KILO_WATT_HOUR
-        elif vp_type == "sensor_el":
+        elif vp_type in ["sensor_el", "sensor_elc"]:
             self._icon = "mdi:flash"
             self._unit = UnitOfPower.WATT
         else:
