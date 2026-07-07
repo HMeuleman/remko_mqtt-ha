@@ -195,7 +195,7 @@ class HeatPump:
         #await asyncio.sleep(5)
         #self._mqtt_counter = self._freq
         self._mqtt_counter = 1
-        await self.mqtt_keep_alive()
+        self._hass.async_create_task(self.mqtt_keep_alive())
         self._hass.bus.fire(self._domain + "_" + self._id + "_msg_rec_event", {})
 
     async def remove_mqtt(self):

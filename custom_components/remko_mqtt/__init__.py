@@ -68,7 +68,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     if hass.is_running:
-        await hass.async_create_task(heatpump.setup_mqtt())
+        hass.async_create_task(heatpump.setup_mqtt())
     else:
         # Wait for hass to start and then add the input_* entities
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, handle_hass_started)
