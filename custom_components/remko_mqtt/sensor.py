@@ -196,7 +196,7 @@ class HeatPumpSensor(SensorEntity):
         return self._vp_reg
 
     @property
-    def unit_of_measurement(self):
+    def native_unit_of_measurement(self):
         """Return the unit of measurement."""
         return self._unit
 
