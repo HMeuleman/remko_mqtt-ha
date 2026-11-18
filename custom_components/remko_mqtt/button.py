@@ -86,7 +86,7 @@ class HeatPumpButton(ButtonEntity):
 
         # set HA instance attributes directly (mostly don't use property)
         self._attr_unique_id = f"{heatpump._domain}_{device_id}"
-        self.entity_id = f"switch.{heatpump._domain}_{device_id}"
+        self.entity_id = f"button.{heatpump._domain}_{device_id}"
 
         _LOGGER.debug("entity_id:" + self.entity_id)
         _LOGGER.debug("idx:" + device_id)
