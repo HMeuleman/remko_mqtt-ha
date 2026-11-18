@@ -18,6 +18,7 @@ from .const import (
     CONF_ID,
     CONF_NAME,
     CONF_VER,
+    INITIAL_STATE,
 )
 
 from .remko_regs import (
@@ -219,15 +220,23 @@ class HeatPumpNumber(NumberEntity):
         """Update the new state of the sensor."""
 
         _LOGGER.debug("update: " + self._idx)
-        self._state = self._hpstate.get_value(self._vp_reg)
-        if self._state is None:
+        raw = self._hpstate.get_value(self._vp_reg)
+        if raw is None:
             _LOGGER.warning("Could not get data for %s", self._idx)
+        elif raw == INITIAL_STATE:
+            # No real data received yet, keep the number unknown
+            self._state = None
+        else:
+            self._state = raw
 
     async def _async_update_event(self, event):
         """Update the new state of the sensor."""
 
         _LOGGER.debug("event: " + self._idx)
         state = self._hpstate[self._vp_reg]
+        if state == INITIAL_STATE:
+            # No real data received yet, keep the number unknown
+            state = None
         if state is None:
             _LOGGER.debug("Could not get data for %s", self._idx)
         if self._state != state:

@@ -38,6 +38,7 @@ from .const import (
     CONF_LANGUAGE,
     CONF_FREQ,
     AVAILABLE_LANGUAGES,
+    INITIAL_STATE,
 )
 
 # import Remko register defines
@@ -183,7 +184,7 @@ class HeatPump:
 
         for k, v in reg_id.items():
             self._id_reg[v[0]] = k
-            self._hpstate[v[0]] = -1
+            self._hpstate[v[0]] = INITIAL_STATE
 
     async def setup_mqtt(self):
         self.unsubscribe_callback = await mqtt.async_subscribe(
