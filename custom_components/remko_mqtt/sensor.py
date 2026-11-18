@@ -206,21 +206,6 @@ class HeatPumpSensor(SensorEntity):
         """Return the icon of the sensor."""
         return self._icon
 
-    async def async_update(self):
-        """Update the value of the entity."""
-        """Update the new state of the sensor."""
-
-        _LOGGER.debug("update: " + self._idx)
-        raw = self._hpstate.get_value(self._vp_reg)
-        if raw is None:
-            _LOGGER.warning("Could not get data for %s", self._idx)
-            self._state = None
-        elif raw == INITIAL_STATE:
-            # No real data received yet, keep the sensor unknown
-            self._state = None
-        else:
-            self._state = raw
-
     async def _async_update_event(self, event):
         """Update the new state of the sensor."""
 

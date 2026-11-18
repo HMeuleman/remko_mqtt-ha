@@ -171,17 +171,6 @@ class HeatPumpSwitch(SwitchEntity):
         """Return the class of this device."""
         return f"{DOMAIN}_HeatPumpSwitch"
 
-    async def async_update(self):
-        """Update the value of the entity."""
-        """Update the new state of the sensor."""
-
-        _LOGGER.debug("update: " + self._idx)
-        reg_state = self._hpstate.get_value(self._vp_reg)
-        if self._state is None:
-            _LOGGER.warning("Could not get data for %s", self._idx)
-        else:
-            self._state = int(reg_state) > 0
-
     async def _async_update_event(self, event):
         """Update the new state of the sensor."""
 

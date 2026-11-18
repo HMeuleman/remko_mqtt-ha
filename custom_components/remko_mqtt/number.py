@@ -215,20 +215,6 @@ class HeatPumpNumber(NumberEntity):
             self._heatpump._hpstate[self._vp_reg] = value
             await self._heatpump.send_mqtt_reg(self._idx, value)
 
-    async def async_update(self):
-        """Update the value of the entity."""
-        """Update the new state of the sensor."""
-
-        _LOGGER.debug("update: " + self._idx)
-        raw = self._hpstate.get_value(self._vp_reg)
-        if raw is None:
-            _LOGGER.warning("Could not get data for %s", self._idx)
-        elif raw == INITIAL_STATE:
-            # No real data received yet, keep the number unknown
-            self._state = None
-        else:
-            self._state = raw
-
     async def _async_update_event(self, event):
         """Update the new state of the sensor."""
 
